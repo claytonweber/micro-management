@@ -1,15 +1,18 @@
 const express = require('express');
 const mysql = require('mysql2');
 const inquirer = require("inquirer");
-const cTable = require("console.table");
+// const cTable = require("console.table");
 
 //Set PORT variable and call express so we use it
-const PORT = process.env.PORT || 3001;
-const app = express;
-
+// const PORT = process.env.PORT || 3001;
+// const app = express;
 //express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+// app.use(express.urlencoded({ extended: false }));
+// app.use(express.json());
+
+
+
+
 
 // Connect to database
 const connection = mysql.createConnection(
@@ -24,49 +27,49 @@ const connection = mysql.createConnection(
 
 const promptList = () => {
   inquirer
-  .prompt({
-    type: 'list',
-    name: 'choice',
-    message: 'Please make your selection.',
-    choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Quit'],
-  })
-  .then((selection) => {
-    switch (selection.choice) {
-      case 'View all departments':
-        viewAllDepartments();
-        break;
-      case 'View all roles':
-        viewAllRoles();
-        break;
-      case 'View all employees':
-        viewAllEmployees();
-        break;
-      case 'Add a department':
-        addADepartment();
-        break;
-      case 'Add a role':
-        addARole();
-        break;
-      case 'Add an employee':
-        addAnEmployee();
-        break;
-      case 'Update an employee role':
-        updateRole();
-        break;
-      //default break probably
-      default:
-        console.log('Quit selected');
-        break;
-    }
-  })
+    .prompt({
+      type: 'list',
+      name: 'choice',
+      message: 'Please make your selection.',
+      choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Quit'],
+    })
+    .then((selection) => {
+      switch (selection.choice) {
+        case 'View all departments':
+          viewAllDepartments();
+          break;
+        case 'View all roles':
+          viewAllRoles();
+          break;
+        case 'View all employees':
+          viewAllEmployees();
+          break;
+        case 'Add a department':
+          addADepartment();
+          break;
+        case 'Add a role':
+          addARole();
+          break;
+        case 'Add an employee':
+          addAnEmployee();
+          break;
+        // case 'Update an employee role':
+          // updateRole();
+          // break;
+        //default break probably
+        default:
+          console.log('Quit selected');
+          break;
+      }
+    })
 };
 
 
 //view things
 
 function viewAllDepartments() {
-  const sql = `SELECT department.id AS id,
-               department.name AS department FROM department`;
+  const sql = `SELECT departments.id AS id,
+               departments.department_name AS departments FROM departments`;
   connection.query(sql, (err, selection) => {
     if (err) throw err;
     console.log(`All Departments:`);
@@ -76,12 +79,10 @@ function viewAllDepartments() {
 };
 
 function viewAllRoles() {
-  const sql = `SELECT roles.id,
-                roles.title,
+  const sql = `SELECT roles.id AS id,
+                roles.title AS title,
                 roles.salary,
-                departments.department_name 
-                FROM roles 
-                INNER JOIN departments ON departments_id = department.id`
+                roles.department_id AS department_id FROM roles`
   connection.query(sql, (err, selection) => {
     if (err) throw err;
     console.log(`All Roles:`);
@@ -95,9 +96,7 @@ function viewAllEmployees() {
                 employees.first_name,
                 employees.last_name,
                 employees.role_id,
-                department.department_name AS department,
-                employees.manager_id AS manager_id
-                FROM employees`;   
+                employees.manager_id AS manager_id FROM employees`;   
   connection.query(sql, (err, selection) => {
     if (err) throw err;
     console.log(`All Employees:`);
@@ -118,7 +117,7 @@ const addADepartment = () => {
       }
     ])
     .then((selection) => {
-      const sql =`INSERT INTO departments (departments.department_name) 
+      const sql =`INSERT INTO departments (departments.department_id) 
                     VALUES (id)`;
       connection.query(sql, selection, (err, res) => {
         if (err) throw err;
@@ -129,6 +128,7 @@ const addADepartment = () => {
     })
 }
 //TODO would like to make a manager list instead of just allEmployees
+//TODO add employee throws error
 const addAnEmployee = () => { 
   inquirer
     .prompt([
@@ -144,8 +144,8 @@ const addAnEmployee = () => {
       },
       {
         type: 'list',
-        name: 'role',
-        message: "What position will the employee be filling?",
+        name: 'role_id',
+        message: "What is the new employee's role?",
         choices: [
           'Sales Lead',
           'Salesperson',
@@ -162,12 +162,12 @@ const addAnEmployee = () => {
         type: 'list',
         name: 'manager_id',
         message: "Who will the new employee's manager be?",
-        choices: allEmployees
+        choices: ['Joe','Mama', 'Whoopie']
       }
     ])
     .then((selection) => {
       const sql =`INSERT INTO employees (first_name, last_name, role_id, manager_id) 
-                    VALUES (id)`;
+                    VALUES ('${selection.first_name}', '${selection.last_name}', '${selection.role_id}', '${selection.manager_id}')`
       connection.query(sql, selection, (err, res) => {
         if (err) throw err;
         console.log(`Employee added!`);
@@ -176,16 +176,50 @@ const addAnEmployee = () => {
       })
     })
 }
-
+//might need to put addARole above create employee? hoisting?
 const addARole = () => {
-
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: 'What is the role?'
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: 'How much does the role pay?'
+      },
+      {
+        list: 'list',
+        name: 'department_id',
+        message: 'Which department does the role belong to?',
+        choices: [
+          'Sales',
+          'Engineering',
+          'Finance',
+          'Legal',
+          'Programming'
+        ]
+      }
+    ])
+    .then((selection) => {
+      const sql =`INSERT INTO roles (title, salary, department_id) 
+                    VALUES (id)`;
+      connection.query(sql, selection, (err, res) => {
+        if (err) throw err;
+        console.log(`Role added!`);
+        console.table(selection);
+        promptList();
+      })
+    })
 }
 
 //update employee role, 
 
-app.listen(PORT, () => {
-  console.log(`Server running on port localhost:${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server running on port localhost:${PORT}`);
+// });
 
 
 promptList();

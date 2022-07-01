@@ -1,7 +1,6 @@
-use employees;
+-- use employees;
 
-INSERT INTO departments
- (department_name)
+INSERT INTO departments (department_name)
 VALUES ("Research"),
        ("Mechanical Engeneering"),
        ("AI/Software");
