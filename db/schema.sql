@@ -9,6 +9,7 @@ CREATE TABLE departments (
   department_name VARCHAR(30) NOT NULL
 );
 
+-- need to reference the department_id to make it accept a string --
 CREATE TABLE roles (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(30),

@@ -108,7 +108,7 @@ function viewAllEmployees() {
 //add things
 
 const addADepartment = () => {
-  inquier
+  inquirer
     .prompt([
       {
         type: 'input',
@@ -117,8 +117,9 @@ const addADepartment = () => {
       }
     ])
     .then((selection) => {
-      const sql =`INSERT INTO departments (departments.department_id) 
-                    VALUES (id)`;
+      const sql =`INSERT INTO departments (department_name) 
+                    VALUES ('${selection.addDepartment}')`;
+      console.log(selection)
       connection.query(sql, selection, (err, res) => {
         if (err) throw err;
         console.log(`Department Added:`);
@@ -205,7 +206,8 @@ const addARole = () => {
     ])
     .then((selection) => {
       const sql =`INSERT INTO roles (title, salary, department_id) 
-                    VALUES (id)`;
+                    VALUES ('${selection.title}', '${selection.salary}', '${selection.department_id}')`;
+      console.log(selection);
       connection.query(sql, selection, (err, res) => {
         if (err) throw err;
         console.log(`Role added!`);
