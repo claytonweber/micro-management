@@ -162,8 +162,8 @@ const addAnEmployee = () => {
       {
         type: 'list',
         name: 'manager_id',
-        message: "Who will the new employee's manager be?",
-        choices: ['Joe','Mama', 'Whoopie']
+        message: "What is the employee's manager's ID?",
+        choices: ["Joe Mama", "Steve Young", "Jimmy Two Boots"]
       }
     ])
     .then((selection) => {
@@ -205,8 +205,7 @@ const addARole = () => {
       }
     ])
     .then((selection) => {
-      const sql =`INSERT INTO roles (title, salary, department_id) 
-                    VALUES ('${selection.title}', '${selection.salary}', '${selection.department_id}')`;
+      const sql = `INSERT INTO roles (title, salary, department_id) VALUES ("${selection.title}", ${selection.salary}, ${selection.department_id})`
       console.log(selection);
       connection.query(sql, selection, (err, res) => {
         if (err) throw err;
